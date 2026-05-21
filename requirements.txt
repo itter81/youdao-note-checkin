@@ -1,0 +1,6 @@
+pyautogui
+pywin32
+psutil
+opencv-python
+pillow
+pygetwindow
