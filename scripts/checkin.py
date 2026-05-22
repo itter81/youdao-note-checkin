@@ -1,8 +1,5 @@
-# -*- coding: utf-8 -*-
-有道云笔记自动签到脚本
-目录: D:\installapp\shanxi-xunjian\
-依赖: pip install pyautogui pywin32 paddleocr paddlepaddle opencv-python pillow psutil
-"""
+# 有道云笔记自动签到脚本
+# 依赖: pip install pyautogui pywin32 opencv-python pillow psutil pygetwindow
 
 import subprocess
 import time
@@ -218,7 +215,23 @@ def find_and_click_checkin(win_x, win_y):
     log(f"🖱️  点击签到按钮: ({click_x}, {click_y})")
     pyautogui.click(click_x, click_y)
     time.sleep(1.5)
-    log("🎉 签到完成！")
+
+    # 检测是否弹出错误弹窗（已签到过/其他错误）
+    screen_w, screen_h = pyautogui.size()
+    img2 = screenshot_region(0, 0, screen_w, screen_h)
+    screen_np2 = cv2.cvtColor(np.array(img2), cv2.COLOR_RGB2BGR)
+
+    # 用模板匹配找"确定"按钮
+    confirm_tmpl = os.path.join(base, "confirm_btn.png")
+    pos = template_match(screen_np2, confirm_tmpl, threshold=0.65)
+    if pos:
+        log(f"⚠️  检测到弹窗，点击确定关闭: {pos}")
+        pyautogui.click(pos[0], pos[1])
+        time.sleep(0.8)
+        log("✅ 今天已经签到过了")
+    else:
+        log("🎉 签到成功！+1M 空间到账")
+
     return True
 
 
